@@ -1,6 +1,10 @@
-# Getting Started with Create React App
+# Todo App User Interface in react js
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This project was built in reactjs. This project based on basic todo app where user can add task, mark task complete more features will come in future commits. For now you can fetch code on your machine then run script
+
+### `npm install`
+
+This command install all directory into node_modules folder. Then Follow below scripts.
 
 ## Available Scripts
 
