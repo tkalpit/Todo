@@ -8,7 +8,7 @@
   }
   .checkbox {
     float: right;
-    right: 1em;
+    right: 4em;
   }
   .btn-sm {
     padding: 0.25rem 1.4rem;
@@ -75,5 +75,19 @@
       text-align: center;
     }
   }
-  
+  .delete-list {
+    float: right;
+    right: 0em;
+    text-align: center;
+    color: #eee;
+    border: 1px solid #fff;
+    border-radius: 50%;
+    padding:1px 6px 3px 6px;
+    box-shadow: 0px 7px 8px 6px #fafafa;
+    font-size: 15px;
+    cursor: pointer;
+    &:hover{
+      background-color: #dc3545;
+    }
+  }
 }

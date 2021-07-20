@@ -1,5 +1,6 @@
-import { useCallback, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { FaTrashAlt } from "react-icons/fa";
 import {
   Card,
   Row,
@@ -9,26 +10,50 @@ import {
   Col,
   InputGroup,
   FormControl,
-  ListGroup,
 } from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.css";
 import "./css/app.css";
 const App = () => {
   const [error, setError] = useState("");
   const [todo, setTodo] = useState("");
-  const [alltodo, setAlltodo] = useState([]);
+  const [alltodo, setAlltodo] = useState(
+    localStorage.getItem("todolists") != null
+      ? JSON.parse(localStorage.getItem("todolists"))
+      : []
+  );
   const [show, setShow] = useState(false);
   const [isChecked, setIsChecked] = useState([]);
   const [uid, setUid] = useState(uuidv4());
   const [isCreateTask, setIsCreateTask] = useState(false);
 
+  useEffect(() => {
+    let todolist = JSON.parse(localStorage.getItem("todolists"));
+    let arr = [];
+    if (todolist != null) {
+      todolist.map((listItem, index) => {
+        if (listItem.checked == 1) {
+          arr.push(listItem.id);
+        }
+      });
+      setIsChecked(arr);
+    }
+  }, []);
+
   const handleTodos = () => {
+    setShow(false);
     if (todo == "") {
-      setError("Please add todo first !!");
+      setError("Please add todo task first !!");
       setShow(true);
     } else {
-      let todoObj = { id: uid, value: todo };
-      setAlltodo([...alltodo, todoObj]);
+      let todoObj = { id: uid, value: todo, checked: 0 };
+      let storage = [];
+      storage =
+        localStorage.getItem("todolists") != null
+          ? JSON.parse(localStorage.getItem("todolists"))
+          : [];
+      storage.push(todoObj);
+      localStorage.setItem("todolists", JSON.stringify(storage));
+      setAlltodo(JSON.parse(localStorage.getItem("todolists")));
       setIsCreateTask(false);
       setTodo("");
       setUid(uuidv4());
@@ -38,14 +63,42 @@ const App = () => {
   const checkClicked = (e) => {
     if (e.target.checked == true) {
       setIsChecked([...isChecked, e.target.value]);
+      let todolist = JSON.parse(localStorage.getItem("todolists"));
+      todolist.map((listItem, index) => {
+        if (listItem.id == e.target.value) {
+          todolist[index].checked = 1;
+        }
+      });
+
+      localStorage.setItem("todolists", JSON.stringify(todolist));
+      setAlltodo(todolist);
     } else {
       let checkedArr = [...isChecked];
       const arrIndex = checkedArr.indexOf(e.target.value);
       if (arrIndex > -1) {
         checkedArr.splice(arrIndex, 1);
+        let todolist = JSON.parse(localStorage.getItem("todolists"));
+        todolist.map((listItem, index) => {
+          if (listItem.id == e.target.value) {
+            todolist[index].checked = 0;
+          }
+        });
+        localStorage.setItem("todolists", JSON.stringify(todolist));
+        setAlltodo(todolist);
         setIsChecked(checkedArr);
       }
     }
+  };
+
+  const deleteTodoList = (id) => {
+    let todolist = JSON.parse(localStorage.getItem("todolists"));
+    todolist.map((listItem, index) => {
+      if (listItem.id == id) {
+        todolist.splice(index, 1);
+      }
+    });
+    localStorage.setItem("todolists", JSON.stringify(todolist));
+    setAlltodo(todolist);
   };
 
   return (
@@ -58,7 +111,7 @@ const App = () => {
           </Col>
         </Row>
         <Row>
-          {error != "" ? (
+          {show && error != "" ? (
             <Alert variant="danger" onClose={() => setShow(false)}>
               <p>{error}</p>
             </Alert>
@@ -70,7 +123,6 @@ const App = () => {
           <Row>
             <Col xs={12}>
               {alltodo.map((todoVal, index) => {
-                console.log(isChecked[index]);
                 return (
                   <Card
                     body
@@ -86,10 +138,17 @@ const App = () => {
                         id={"checkbox" + index}
                         onChange={checkClicked}
                         value={todoVal.id}
+                        checked={todoVal.checked}
                         data-key={todoVal.id}
                         className="check-input"
                       />
                       <label htmlFor={"checkbox" + index}></label>
+                    </span>
+                    <span
+                      className="delete-list round"
+                      onClick={() => deleteTodoList(todoVal.id)}
+                    >
+                      <FaTrashAlt />
                     </span>
                   </Card>
                 );
@@ -99,13 +158,21 @@ const App = () => {
         ) : (
           <Row className="empty-task">
             <Col xs={12}>
-              <p className="alert alert-warning"><b>No Tasks available..</b> Click on below button to add new tasks..!!</p>
+              <p className="alert alert-warning">
+                <b>No Tasks available..</b> Click on below button to add new
+                tasks..!!
+              </p>
             </Col>
           </Row>
         )}
         <Row className={!isCreateTask ? "create-task" : "hide-task"}>
           <Col sm={12} xs={12}>
-            <Button className="add-task-btn" onClick={()=>setIsCreateTask(true)}>+</Button>
+            <Button
+              className="add-task-btn"
+              onClick={() => setIsCreateTask(true)}
+            >
+              +
+            </Button>
           </Col>
         </Row>
         <Row className={isCreateTask ? "create-task" : "hide-task"}>
